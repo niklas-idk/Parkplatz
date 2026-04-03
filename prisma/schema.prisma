@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+  // Railway: Set DATABASE_URL=file:./prisma/dev.db in environment variables
 }
 
 model User {
