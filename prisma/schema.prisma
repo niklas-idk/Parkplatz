@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         String    @default("USER")
+  createdAt    DateTime  @default(now())
+  bookings     Booking[]
+}
+
+model ParkingSpot {
+  id          String    @id @default(cuid())
+  label       String    @unique
+  description String    @default("")
+  bookings    Booking[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  userId    String
+  spotId    String
+  date      String
+  startTime String
+  endTime   String
+  slotId    String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  user    User        @relation(fields: [userId], references: [id])
+  spot    ParkingSpot @relation(fields: [spotId], references: [id])
+  payment Payment?
+
+  @@unique([spotId, date, slotId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  paypalOrderId String
+  amount        Float
+  currency      String   @default("EUR")
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
