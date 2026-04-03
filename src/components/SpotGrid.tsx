@@ -7,7 +7,6 @@ interface BookingInfo {
   id: string;
   slotId: string;
   status: string;
-  userId: string;
 }
 
 interface SpotWithBookings {
@@ -20,6 +19,7 @@ interface SpotWithBookings {
 interface SpotGridProps {
   spots: SpotWithBookings[];
   date: string;
+  isLoggedIn?: boolean;
 }
 
 function getAvailability(bookings: BookingInfo[]) {
@@ -37,7 +37,7 @@ function getAvailability(bookings: BookingInfo[]) {
   return { status: "free" as const, label: "Frei", color: "bg-green-100 border-green-300 text-green-700" };
 }
 
-export default function SpotGrid({ spots, date }: SpotGridProps) {
+export default function SpotGrid({ spots, date, isLoggedIn = true }: SpotGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {spots.map((spot) => {
@@ -50,13 +50,19 @@ export default function SpotGrid({ spots, date }: SpotGridProps) {
           return true;
         });
 
+        const canClick = avail.status !== "full" && isLoggedIn;
+        const href = canClick ? `/buchen/${spot.id}?date=${date}` : "#";
+
         return (
           <Link
             key={spot.id}
-            href={avail.status === "full" ? "#" : `/buchen/${spot.id}?date=${date}`}
+            href={href}
+            onClick={(e) => { if (!canClick) e.preventDefault(); }}
             className={`block p-4 rounded-xl border-2 transition-all ${
               avail.status === "full"
                 ? "opacity-60 cursor-not-allowed"
+                : !isLoggedIn
+                ? "cursor-default"
                 : "hover:shadow-lg hover:scale-105 cursor-pointer"
             } ${avail.color}`}
           >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Calendar from "@/components/Calendar";
 import SpotGrid from "@/components/SpotGrid";
 
 export default function BuchenPage() {
@@ -20,40 +21,37 @@ export default function BuchenPage() {
       .catch(() => setLoading(false));
   }, [date]);
 
+  const dateFormatted = new Date(date + "T00:00:00").toLocaleDateString("de-DE", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Parkplatz buchen</h1>
 
-      <div className="mb-6">
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-          Datum wählen
-        </label>
-        <input
-          id="date"
-          type="date"
-          value={date}
-          min={today}
-          onChange={(e) => setDate(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 items-start">
+        <Calendar selectedDate={date} onSelectDate={setDate} />
+
+        <div>
+          <h2 className="text-xl font-semibold mb-1">
+            Verfügbarkeit am {dateFormatted}
+          </h2>
+          <p className="text-sm text-gray-400 mb-4">
+            Klicke auf einen freien Parkplatz, um einen Zeitslot zu buchen.
+          </p>
+
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-lg p-12 text-center text-gray-400">
+              Lade Parkplätze...
+            </div>
+          ) : (
+            <SpotGrid spots={spots} date={date} />
+          )}
+        </div>
       </div>
-
-      <p className="text-gray-500 text-sm mb-4">
-        Wähle einen freien Parkplatz für den{" "}
-        {new Date(date + "T00:00:00").toLocaleDateString("de-DE", {
-          weekday: "long",
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        })}
-        :
-      </p>
-
-      {loading ? (
-        <div className="text-center py-12 text-gray-400">Lade Parkplätze...</div>
-      ) : (
-        <SpotGrid spots={spots} date={date} />
-      )}
     </div>
   );
 }
